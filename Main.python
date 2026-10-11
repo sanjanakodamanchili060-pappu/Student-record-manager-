@@ -1,0 +1,53 @@
+import re
+import json
+import os
+
+DATA_FILE = "students.json"
+EMAIL_REGEX = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+
+def validate_email(email):
+    return re.match(EMAIL_REGEX, email) is not None
+
+def add_student():
+    try:
+        print("--- Add New Student ---")
+        student_id = input("Enter Student ID: ").strip()
+        name = input("Enter Student Name: ").strip()
+        email = input("Enter Student Email: ").strip()
+        course = input("Enter Course: ").strip()
+
+        if not student_id or not name or not course:
+            raise ValueError("ID, Name and Course cannot be empty!")
+
+        if not validate_email(email):
+            raise ValueError(f"Invalid Email Format: {email}")
+
+        student = {
+            "id": student_id,
+            "name": name,
+            "email": email,
+            "course": course
+        }
+
+        students = []
+        if os.path.exists(DATA_FILE):
+            with open(DATA_FILE, 'r') as f:
+                try:
+                    students = json.load(f)
+                except json.JSONDecodeError:
+                    students = []
+
+        students.append(student)
+
+        with open(DATA_FILE, 'w') as f:
+            json.dump(students, f, indent=4)
+
+        print(f"\nStudent {name} added successfully!")
+
+    except ValueError as ve:
+        print(f"[Input Error]: {ve}")
+    except Exception as e:
+        print(f"[Unexpected Error]: {e}")
+
+if __name__ == "__main__":
+    add_student()
