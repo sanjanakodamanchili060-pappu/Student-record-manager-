@@ -1,0 +1,52 @@
+import json
+import os
+
+DATA_FILE = "students.json"
+
+def read_student_data():
+    try:
+        print("--- Reading Student Data ---")
+
+        if not os.path.exists(DATA_FILE):
+            raise FileNotFoundError(f"{DATA_FILE} not found! Add students first.")
+
+        with open(DATA_FILE, 'r') as f:
+            students = json.load(f)
+
+        if not students:
+            print("No student records found.")
+            return
+
+        print(f"\nTotal Students: {len(students)}\n")
+        print(f"{'ID':<10} {'Name':<20} {'Email':<25} {'Course':<15}")
+        print("-" * 70)
+
+        for student in students:
+            try:
+                print(f"{student['id']:<10} {student['name']:<20} {student['email']:<25} {student['course']:<15}")
+            except KeyError as ke:
+                print(f"[Data Corruption]: Missing field {ke} in {student}")
+
+    except FileNotFoundError as fnf:
+        print(f"[File Error]: {fnf}")
+    except json.JSONDecodeError:
+        print("[File Error]: Invalid JSON format. File may be corrupted.")
+    except Exception as e:
+        print(f"[Unexpected Error]: {e}")
+
+    # Search with exception handling
+    try:
+        search_id = input("\nEnter ID to search (or press Enter to skip): ").strip()
+        if search_id:
+            with open(DATA_FILE, 'r') as f:
+                students = json.load(f)
+            found = [s for s in students if s['id'] == search_id]
+            if found:
+                print(f"\nFound: {found[0]}")
+            else:
+                raise ValueError(f"No student found with ID {search_id}")
+    except ValueError as ve:
+        print(f"[Search Error]: {ve}")
+
+if __name__ == "__main__":
+    read_student_data()
